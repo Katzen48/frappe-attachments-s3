@@ -27,12 +27,21 @@ class S3Operations(object):
         )
         self.S3 = boto3.resource(
             's3', region_name=self.s3_settings_doc.region_name)
-        self.S3_CLIENT = boto3.client(
-            's3',
-            aws_access_key_id=self.s3_settings_doc.aws_key,
-            aws_secret_access_key=self.s3_settings_doc.aws_secret,
-            region_name=self.s3_settings_doc.region_name,
-        )
+
+        if self.s3_settings_doc.endpoint_url:
+            self.S3_CLIENT = boto3.client(
+                's3',
+                aws_access_key_id=self.s3_settings_doc.aws_key,
+                aws_secret_access_key=self.s3_settings_doc.aws_secret,
+                endpoint_url=self.s3_settings_doc.endpoint_url,
+            )
+        else:
+            self.S3_CLIENT = boto3.client(
+                's3',
+                aws_access_key_id=self.s3_settings_doc.aws_key,
+                aws_secret_access_key=self.s3_settings_doc.aws_secret,
+                region_name=self.s3_settings_doc.region_name,
+            )
         self.BUCKET = self.s3_settings_doc.bucket_name
         self.folder_name = self.s3_settings_doc.folder_name
 
