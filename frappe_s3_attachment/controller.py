@@ -197,12 +197,17 @@ def file_upload_to_s3(doc, method):
             file_path, doc.file_name, doc.is_private, parent_doctype, parent_name
         )
 
+        if s3_upload.s3_settings_doc.public_url:
+            s3_url = s3_upload.s3_settings_doc.public_url
+        else:
+            s3_url = s3_upload.S3_CLIENT.meta.endpoint_url
+
         if doc.is_private:
             method = "frappe_s3_attachment.controller.generate_file"
             file_url = """/api/method/{0}?key={1}""".format(method, key)
         else:
             file_url = '{}/{}/{}'.format(
-                s3_upload.S3_CLIENT.meta.endpoint_url,
+                s3_url,
                 s3_upload.BUCKET,
                 key
             )
