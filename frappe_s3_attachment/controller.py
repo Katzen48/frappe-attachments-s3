@@ -197,20 +197,31 @@ def file_upload_to_s3(doc, method):
             file_path, doc.file_name, doc.is_private, parent_doctype, parent_name
         )
 
+        custom_url = False
         if s3_upload.s3_settings_doc.public_url:
             s3_url = s3_upload.s3_settings_doc.public_url
+            custom_url = True
         else:
             s3_url = s3_upload.S3_CLIENT.meta.endpoint_url
+
+        if s3_url.endswith('/'):
+            s3_url = s3_url[:-1]
 
         if doc.is_private:
             method = "frappe_s3_attachment.controller.generate_file"
             file_url = """/api/method/{0}?key={1}""".format(method, key)
         else:
-            file_url = '{}/{}/{}'.format(
-                s3_url,
-                s3_upload.BUCKET,
-                key
-            )
+            if not custom_url:
+                file_url = '{}/{}/{}'.format(
+                    s3_url,
+                    s3_upload.BUCKET,
+                    key
+                )
+            else:
+                file_url = '{}/{}'.format(
+                    s3_url,
+                    key
+                )
         os.remove(file_path)
         doc = frappe.db.sql("""UPDATE `tabFile` SET file_url=%s, folder=%s,
             old_parent=%s, content_hash=%s WHERE name=%s""", (
